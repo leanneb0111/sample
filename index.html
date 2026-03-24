@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ScamShield AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0d1117;
+      --panel: #0f1624;
+      --accent: #7cf4a7;
+      --accent-2: #70c4ff;
+      --warn: #ff6b6b;
+      --text: #e8edf5;
+      --muted: #9fb0c7;
+      --card: rgba(255, 255, 255, 0.04);
+      --border: rgba(255, 255, 255, 0.08);
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+      background: radial-gradient(circle at 20% 20%, rgba(124, 244, 167, 0.06), transparent 30%),
+        radial-gradient(circle at 80% 10%, rgba(112, 196, 255, 0.08), transparent 30%),
+        radial-gradient(circle at 50% 80%, rgba(255, 107, 107, 0.05), transparent 32%),
+        linear-gradient(135deg, #0b101b, #111b2b);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 36px 16px 48px;
+    }
+
+    .shell {
+      width: min(1080px, 96vw);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .glow-ring {
+      position: absolute;
+      inset: -30%;
+      background: radial-gradient(circle, rgba(112, 196, 255, 0.12), transparent 50%);
+      filter: blur(50px);
+      pointer-events: none;
+    }
+
+    .frame {
+      position: relative;
+      padding: 32px clamp(18px, 4vw, 40px) 38px;
+      display: grid;
+      gap: 24px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      font-size: clamp(18px, 2vw, 20px);
+    }
+
+    .badge {
+      padding: 6px 10px;
+      border-radius: 12px;
+      background: rgba(124, 244, 167, 0.12);
+      color: var(--accent);
+      border: 1px solid rgba(124, 244, 167, 0.3);
+      font-size: 12px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .hero {
+      display: grid;
+      gap: 12px;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(30px, 4vw, 44px);
+      letter-spacing: -0.02em;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 640px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 4px;
+      align-items: center;
+    }
+
+    .rules {
+      display: inline-flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .rules span {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #0b101b;
+      border: none;
+      padding: 14px 20px;
+      font-weight: 700;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+      box-shadow: 0 12px 30px rgba(112, 196, 255, 0.25);
+    }
+
+    button.primary:hover { transform: translateY(-1px) scale(1.01); }
+    button.primary:active { transform: translateY(1px) scale(0.99); }
+
+    .ghost-link {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.02);
+      transition: border-color 0.12s ease, color 0.12s ease;
+    }
+
+    .ghost-link:hover { border-color: rgba(255, 255, 255, 0.18); color: var(--text); }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+
+    .card {
+      padding: 16px;
+      border-radius: 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+
+    .card h3 { margin: 0 0 6px; font-size: 15px; letter-spacing: 0.01em; }
+    .card p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+
+    .game {
+      margin-top: 4px;
+      padding: 18px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      display: grid;
+      gap: 12px;
+    }
+
+    .status-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+    }
+
+    .stat {
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .stat strong { color: var(--text); font-size: 15px; letter-spacing: 0.01em; }
+
+    .message-panel {
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: linear-gradient(135deg, rgba(124, 244, 167, 0.04), rgba(112, 196, 255, 0.03));
+      padding: 16px;
+      min-height: 120px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .flash-win { box-shadow: 0 0 0 2px rgba(124, 244, 167, 0.45); }
+    .flash-warn { box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.5); }
+
+    .label {
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    #messageText {
+      font-size: 20px;
+      letter-spacing: 0.01em;
+      line-height: 1.5;
+      margin: 4px 0 0;
+    }
+
+    .shake { animation: shake 0.8s ease-in-out both; }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(3px); }
+    }
+
+    .choices {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+    }
+
+    .choice-hint {
+      margin-top: -2px;
+      color: var(--muted);
+    }
+
+    button.choice {
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text);
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      transition: transform 0.14s ease, border-color 0.14s ease, background-color 0.14s ease;
+    }
+
+    button.choice:hover { transform: translateY(-1px); border-color: rgba(255, 255, 255, 0.14); }
+    button.choice:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    button.scam { background: rgba(255, 107, 107, 0.08); border-color: rgba(255, 107, 107, 0.32); }
+    button.legit { background: rgba(124, 244, 167, 0.08); border-color: rgba(124, 244, 167, 0.32); }
+
+    .feedback { font-size: 16px; min-height: 28px; }
+    .roast { font-size: 14px; color: #f7c266; min-height: 24px; }
+
+    .meme-box {
+      display: grid;
+      gap: 10px;
+      grid-auto-flow: column;
+      align-items: center;
+      justify-content: start;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .meme-box img {
+      max-width: 220px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+      background: #0b101b;
+    }
+
+    .next { justify-self: start; }
+
+    .meter {
+      width: 100%;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .meter span {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--accent), var(--warn));
+      transition: width 0.4s ease;
+    }
+
+    .micro-copy {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .modal, .overlay {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background: rgba(6, 9, 15, 0.8);
+      backdrop-filter: blur(4px);
+      z-index: 10;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.24s ease;
+    }
+
+    .modal.active, .overlay.active { opacity: 1; pointer-events: auto; }
+
+    .modal-card {
+      width: min(420px, 90vw);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 18px 18px;
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 12px;
+    }
+
+    .modal-card h2 { margin: 0; font-size: 20px; }
+    .modal-card p { margin: 0; color: var(--muted); line-height: 1.5; }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    input[type="email"] {
+      flex: 1;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+    }
+
+    .virus {
+      color: var(--warn);
+      text-align: center;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      animation: glitch 1.2s infinite;
+    }
+
+    @keyframes glitch {
+      0% { text-shadow: 2px 0 var(--accent), -2px -2px var(--accent-2); }
+      50% { text-shadow: -2px 0 var(--accent), 2px 2px var(--accent-2); }
+      100% { text-shadow: 2px -2px var(--accent), -2px 0 var(--accent-2); }
+    }
+
+    .fake-progress {
+      width: 100%;
+      height: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.06);
+      position: relative;
+    }
+
+    .fake-progress span {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(255, 107, 107, 0.8), rgba(112, 196, 255, 0.8));
+      width: 0;
+      animation: load 4s linear forwards;
+    }
+
+    @keyframes load { to { width: 100%; } }
+
+    .ending {
+      text-align: center;
+      display: grid;
+      gap: 10px;
+      padding: 20px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+    }
+
+    .tagline {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    @media (max-width: 720px) {
+      .hero h1 { font-size: 28px; }
+      .topbar { gap: 8px; }
+      .stat { font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="glow-ring" aria-hidden="true"></div>
+    <div class="frame">
+      <div class="topbar">
+        <div class="brand">
+          <span aria-hidden="true">🛡️</span>
+          <span>ScamShield AI™</span>
+        </div>
+      
+      </div>
+
+      <div class="hero">
+        <h1>Welcome to ScamShield AI™</h1>
+        <p>We detect scams using advanced artificial intelligence. Press the button below to enter the most serious, absolutely legitimate, definitely not suspicious training lab on the internet.</p>
+        <div class="actions-row">
+          <button id="startBtn" class="primary">Start Detecting</button>
+          <span class="micro-copy">Expect fake popups, glitch alerts, and questionable life choices.</span>
+        </div>
+        <div class="rules">
+          <span>1) Read the message</span>
+          <span>2) Pick Scam vs Legit</span>
+          <span>3) Enjoy the chaos</span>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h3>How it works</h3>
+          <p>We show a message. You call it Legit or Scam. We judge you either way.</p>
+        </div>
+        <div class="card">
+          <h3>Pro tip</h3>
+          <p>If a site asks for $5 to continue, that is a red flag. Yes, we will ask you for $5.</p>
+        </div>
+        <div class="card">
+          <h3>Sound on</h3>
+          <p>Expect error beeps, fake alerts, and a tasteful vine-boom-ish thud.</p>
+        </div>
+      </div>
+
+      <div class="game" id="game" hidden>
+        <div class="status-row">
+          <div class="stat">Round <strong id="roundLabel">0 / 6</strong></div>
+          <div class="stat">Score <strong id="scoreLabel">0</strong></div>
+          <div class="stat">Suspicion level
+            <span class="meter"><span id="meterFill"></span></span>
+          </div>
+        </div>
+
+        <div class="message-panel" id="messagePanel">
+          <div class="label">Step 1: Incoming message</div>
+          <div id="messageText">Press Start Detecting to begin.</div>
+        </div>
+
+        <div class="label">Step 2: Choose wisely</div>
+        <div class="choices">
+          <button id="legitBtn" class="choice legit" disabled>Legit</button>
+          <button id="scamBtn" class="choice scam" disabled>Scam</button>
+        </div>
+        <div class="micro-copy choice-hint">If it smells like free money or panic, tap Scam. If it is boring work stuff, maybe Legit.</div>
+
+        <div class="feedback" id="feedback"></div>
+        <div class="roast" id="roast"></div>
+        <div id="memeBox" class="meme-box"></div>
+        <button id="nextBtn" class="ghost-link next" disabled>Next message</button>
+      </div>
+
+      <div id="ending" class="ending" hidden></div>
+    </div>
+  </div>
+
+  <div id="noticeModal" class="modal" aria-hidden="true">
+    <div class="modal-card">
+      <h2>Allow notifications to continue</h2>
+      <p>Because every secure site begs for this.</p>
+      <div class="input-row">
+        <input id="emailInput" type="email" placeholder="Enter your email for better protection" />
+        <button id="emailSubmit" class="primary" style="padding: 12px 16px;">Allow</button>
+      </div>
+      <button id="denyNotice" class="ghost-link" style="justify-self: start;">Deny and hope for the best</button>
+    </div>
+  </div>
+
+  <div id="virusOverlay" class="overlay" aria-hidden="true">
+    <div class="modal-card" style="width: min(520px, 92vw); text-align: center;">
+      <div class="virus">SYSTEM INFECTED</div>
+      <p>Deleting files   Deleting trust   Deleting ego</p>
+      <div class="fake-progress" aria-hidden="true"><span></span></div>
+      <p class="micro-copy">Relax. This is why you do not trust random websites 😂</p>
+    </div>
+  </div>
+
+  <div id="paywall" class="modal" aria-hidden="true">
+    <div class="modal-card" style="text-align: center;">
+      <h2>To continue, send $5 to unlock premium scam detection</h2>
+      <p>Top-tier protection is only five bucks away. What could go wrong?</p>
+      <div class="actions-row" style="justify-content: center;">
+        <button id="payBtn" class="primary">Pay $5</button>
+        <button id="exitBtn" class="ghost-link">Exit</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const startBtn = document.getElementById('startBtn');
+    const game = document.getElementById('game');
+    const roundLabel = document.getElementById('roundLabel');
+    const scoreLabel = document.getElementById('scoreLabel');
+    const meterFill = document.getElementById('meterFill');
+    const messageText = document.getElementById('messageText');
+    const messagePanel = document.getElementById('messagePanel');
+    const legitBtn = document.getElementById('legitBtn');
+    const scamBtn = document.getElementById('scamBtn');
+    const feedback = document.getElementById('feedback');
+    const roast = document.getElementById('roast');
+    const memeBox = document.getElementById('memeBox');
+    const nextBtn = document.getElementById('nextBtn');
+    const ending = document.getElementById('ending');
+
+    const noticeModal = document.getElementById('noticeModal');
+    const emailInput = document.getElementById('emailInput');
+    const emailSubmit = document.getElementById('emailSubmit');
+    const denyNotice = document.getElementById('denyNotice');
+
+    const virusOverlay = document.getElementById('virusOverlay');
+    const paywall = document.getElementById('paywall');
+    const payBtn = document.getElementById('payBtn');
+    const exitBtn = document.getElementById('exitBtn');
+
+    const scenarios = [
+      { text: 'CONGRATULATIONS! You won $500,000! Click here to claim!', isScam: true },
+      { text: 'Hot singles near you want to chat right now.', isScam: true },
+      { text: 'A Nigerian prince wants to Venmo you $2M for “storage fees”.', isScam: true },
+      { text: 'Your free PS6 ships today—just enter your Social Security number.', isScam: true },
+      { text: 'IRS UPDATE: We now issue refunds in V-Bucks. Log in fast.', isScam: true },
+      { text: 'Your pizza is arriving! Track the driver in the official app.', isScam: false },
+      { text: 'We noticed a new login on your account from Antarctica. Was this you?', isScam: false },
+      { text: 'Office memo: Free donuts in the break room. Bring your own coffee.', isScam: false },
+      { text: 'Urgent: Send $5 gas fee to release your NFT treasure chest.', isScam: true },
+      { text: 'Streamer giveaway: first 50 people get a free console! Just login with your bank.', isScam: true }
+    ];
+
+    const roasts = [
+      'You trust people too easily 😭',
+      'You would 100% click Free iPhone.',
+      'If curiosity killed cats, you would be an entire documentary.',
+      'Banks love you. Scammers love you more.',
+      'We are adding you to the hall of almost-got-em.',
+      'You just hovered over that link, did you not?',
+      'Somewhere, an antivirus just facepalmed.'
+    ];
+
+    const winMemes = [
+      { url: 'https://media.tenor.com/fLfgamfVugYAAAAM/cheering-baby-yeah.gif', alt: 'Cheering baby' },
+      { url: 'https://media.tenor.com/mLiwZJHdcqEAAAAd/wohoo-woohoo.gif', alt: 'Woohoo' },
+      { url: 'https://media.tenor.com/ZyN1ye_G0akAAAAM/victory.gif', alt: 'Victory' }
+    ];
+
+    const failMemes = [
+      { url: 'https://media.tenor.com/DKJY-z1BnKQAAAAM/crying-cat-sad-kitty.webp', alt: 'Crying cat' },
+      { url: 'https://media.tenor.com/dqCu99FHcn4AAAAM/multimediabae.gif', alt: 'Facepalm' },
+      { url: 'https://media.tenor.com/ZDa1nFltu_QAAAAM/crying-bawling.gif', alt: 'Bawling' }
+    ];
+
+    const maxRounds = 6;
+    let round = 0;
+    let score = 0;
+    let currentScenario = null;
+    let triggeredNotice = false;
+    let triggeredVirus = false;
+    let triggeredPaywall = false;
+
+    function playTone(type = 'info') {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain).connect(ctx.destination);
+        const map = { success: 520, error: 180, boom: 72, info: 360 };
+        osc.frequency.value = map[type] || 360;
+        osc.type = type === 'boom' ? 'sawtooth' : 'sine';
+        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.35);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.4);
+      } catch (e) {
+        console.log('Audio skipped', e);
+      }
+    }
+
+    function setButtonsEnabled(state) {
+      legitBtn.disabled = !state;
+      scamBtn.disabled = !state;
+    }
+
+    function updateUI() {
+      roundLabel.textContent = `${round} / ${maxRounds}`;
+      scoreLabel.textContent = score;
+      meterFill.style.width = `${Math.min(100, (round / maxRounds) * 100)}%`;
+    }
+
+    function pickScenario() {
+      currentScenario = scenarios[Math.floor(Math.random() * scenarios.length)];
+      messageText.textContent = currentScenario.text;
+      messageText.classList.add('shake');
+      setTimeout(() => messageText.classList.remove('shake'), 900);
+    }
+
+    function showRoast(correct) {
+      if (correct) {
+        roast.textContent = 'But why did you consider clicking it? 🤨';
+      } else {
+        const line = roasts[Math.floor(Math.random() * roasts.length)];
+        roast.textContent = `We are a little concerned about you... ${line}`;
+      }
+    }
+
+    function flashPanel(className) {
+      messagePanel.classList.remove('flash-win', 'flash-warn');
+      messagePanel.classList.add(className);
+      setTimeout(() => messagePanel.classList.remove(className), 420);
+    }
+
+    function showMeme(correct) {
+      const pool = correct ? winMemes : failMemes;
+      const meme = pool[Math.floor(Math.random() * pool.length)];
+      memeBox.innerHTML = `<img src="${meme.url}" alt="${meme.alt}">`;
+    }
+
+    function handleAnswer(choiceIsScam) {
+      if (!currentScenario) return;
+      setButtonsEnabled(false);
+      const isCorrect = choiceIsScam === currentScenario.isScam;
+      if (isCorrect) {
+        score += 1;
+        feedback.textContent = 'Correct! This is a scam 👏';
+        showRoast(true);
+        playTone('success');
+        flashPanel('flash-win');
+        showMeme(true);
+      } else {
+        feedback.textContent = 'Wrong 😬 This was obviously a scam.';
+        showRoast(false);
+        playTone('error');
+        flashPanel('flash-warn');
+        showMeme(false);
+      }
+      updateUI();
+      nextBtn.disabled = false;
+      maybeTriggerTwists();
+    }
+
+    function nextRound() {
+      round += 1;
+      if (round > maxRounds) return endGame();
+      feedback.textContent = '';
+      roast.textContent = '';
+      memeBox.innerHTML = '';
+      nextBtn.disabled = true;
+      setButtonsEnabled(true);
+      pickScenario();
+      updateUI();
+    }
+
+    function endGame() {
+      game.hidden = true;
+      ending.hidden = false;
+      ending.innerHTML = `
+        <div class="tagline">Final ending</div>
+        <h2>💀 CERTIFIED SCAM VICTIM</h2>
+        <p>Congratulations! You are now officially labeled after ${round - 1} rounds with a score of ${score}. Close your tabs and call a friend.</p>
+        <button class="primary" onclick="window.location.reload()">Try again (carefully)</button>
+      `;
+      playTone('boom');
+    }
+
+    function maybeTriggerTwists() {
+      if (round === 2 && !triggeredNotice) {
+        triggeredNotice = true;
+        noticeModal.classList.add('active');
+      }
+      if (round === 3 && !triggeredVirus) {
+        triggeredVirus = true;
+        virusOverlay.classList.add('active');
+        setTimeout(() => virusOverlay.classList.remove('active'), 4200);
+        playTone('boom');
+      }
+      if (round === 4 && !triggeredPaywall) {
+        triggeredPaywall = true;
+        paywall.classList.add('active');
+      }
+    }
+
+    startBtn.addEventListener('click', () => {
+      game.hidden = false;
+      ending.hidden = true;
+      round = 0;
+      score = 0;
+      triggeredNotice = triggeredVirus = triggeredPaywall = false;
+      nextRound();
+      playTone('info');
+    });
+
+    legitBtn.addEventListener('click', () => handleAnswer(false));
+    scamBtn.addEventListener('click', () => handleAnswer(true));
+    nextBtn.addEventListener('click', nextRound);
+
+    emailSubmit.addEventListener('click', () => {
+      noticeModal.classList.remove('active');
+      feedback.textContent = 'Thanks! We will sell this to scammers 💀';
+      playTone('error');
+      emailInput.value = '';
+    });
+
+    denyNotice.addEventListener('click', () => {
+      noticeModal.classList.remove('active');
+      feedback.textContent = 'Bold move. Notification denied.';
+    });
+
+    payBtn.addEventListener('click', () => {
+      paywall.classList.remove('active');
+      feedback.textContent = 'You just got scammed... on a scam detector site 💀';
+      playTone('boom');
+    });
+
+    exitBtn.addEventListener('click', () => {
+      paywall.classList.remove('active');
+      feedback.textContent = 'Exit chosen. Proud of you. Slightly.';
+    });
+  </script>
+</body>
+</html>
